@@ -3,6 +3,7 @@ import jade.core.Agent;
 import jade.core.behaviours.*;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
+import jade.lang.acl.UnreadableException;
 
 public class AgentB extends Agent{
 	public void setup() {
@@ -42,9 +43,15 @@ public class AgentB extends Agent{
 			MessageTemplate modele = MessageTemplate.MatchPerformative(ACLMessage.PROPOSE);
 			ACLMessage msgRecu = receive(modele);
 			if (msgRecu != null) {
-				String n = msgRecu.getContent();
+				Proposition n = new Proposition();
+				try {
+					n = (Proposition) msgRecu.getContentObject();
+				} catch (UnreadableException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 				AID id = msgRecu.getSender();
-				System.out.println("Propostion "+ n +" reçu par " + id.getLocalName());
+				System.out.println("Propostion {"+ n.getCoalition().getTaches() + "},{"+ n.getCoalition().getAgents() +"}" + " reçu par " + id.getLocalName());
 				}
 			else {
 				block();

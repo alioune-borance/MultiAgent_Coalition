@@ -1,3 +1,7 @@
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
 import jade.core.AID;
 import jade.core.Agent;
 import jade.core.behaviours.*;
@@ -36,7 +40,20 @@ public class AgentA extends Agent{
 			System.out.println("[ Envoi de proposition A /A ]");
 			ACLMessage msg = new ACLMessage(ACLMessage.PROPOSE);
 			msg.addReceiver(new AID("AgentB",AID.ISLOCALNAME));
-			msg.setContent("Proposition A1");
+			List<String> t = new ArrayList<String>();
+			List<String> a = new ArrayList<String>();
+			t.add("t1");
+			t.add("t2");
+			a.add("AgentA");
+			a.add("AgentB");
+			Coalition coalition = new Coalition(a,t);
+			Proposition prop = new  Proposition("AgentA","AgentB",coalition);
+			try {
+				msg.setContentObject(prop);
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 			send(msg);
 		}
 		
