@@ -6,11 +6,11 @@ import jade.core.Agent;
 public class Coalition implements Serializable{
 	//private List<Agent> agents;
 	private List<String> agents;
-	private List<String> taches;
+	private List<Tache> taches;
 	
 	public Coalition() {}
 	
-	public Coalition(List<String> agents,List<String> taches) {
+	public Coalition(List<String> agents,List<Tache> taches) {
 		this.agents = agents;
 		this.taches = taches;
 	}
@@ -23,11 +23,11 @@ public class Coalition implements Serializable{
 		this.agents = agents;
 	}
 
-	public List<String> getTaches() {
+	public List<Tache> getTaches() {
 		return taches;
 	}
 
-	public void setTaches(List<String> taches) {
+	public void setTaches(List<Tache> taches) {
 		this.taches = taches;
 	}
 	

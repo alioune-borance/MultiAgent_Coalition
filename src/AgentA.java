@@ -40,10 +40,10 @@ public class AgentA extends Agent{
 			System.out.println("[ Envoi de proposition A /A ]");
 			ACLMessage msg = new ACLMessage(ACLMessage.PROPOSE);
 			msg.addReceiver(new AID("AgentB",AID.ISLOCALNAME));
-			List<String> t = new ArrayList<String>();
+			List<Tache> t = new ArrayList<Tache>();
 			List<String> a = new ArrayList<String>();
-			t.add("t1");
-			t.add("t2");
+			t.add(new Tache("t1",1.0,2.));
+			t.add(new Tache("t2",1.0,2.));
 			a.add("AgentA");
 			a.add("AgentB");
 			Coalition coalition = new Coalition(a,t);
