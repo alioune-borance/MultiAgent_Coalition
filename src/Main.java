@@ -1,4 +1,7 @@
 import jade.core.Runtime;
+
+import java.util.ArrayList;
+
 import jade.core.Profile;
 import jade.core.ProfileImpl;
 import jade.wrapper.*;
@@ -17,6 +20,7 @@ public class Main {
 	       profile.setParameter(Profile.GUI, "true");
 	       ContainerController containerController = runtime.createMainContainer(profile);
 
+	       
 	       for(int i=1; i<6; i++){
 	           AgentController policeAgentController;
 	           try {
