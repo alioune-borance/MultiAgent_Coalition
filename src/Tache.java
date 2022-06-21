@@ -2,8 +2,10 @@ import java.io.Serializable;
 
 public class Tache implements Serializable{
 	private String intitule;
-	private Double coutPrive;
-	private Double coutPublic;
+	private Double coutPrive;	// Uniquement connu par l'agent
+	private Double coutPublic;	
+	
+	private double coutIndividuelTache; // Tâche effectuée sans collaboration
 	
 	
 	public Tache(String intitule, Double coutPrive, Double coutPublic) {
@@ -11,6 +13,7 @@ public class Tache implements Serializable{
 		this.intitule = intitule;
 		this.coutPrive = coutPrive;
 		this.coutPublic = coutPublic;
+		this.coutIndividuelTache = this.coutPublic + this.coutPrive;
 	}
 	
 	public Tache() {}
@@ -25,6 +28,10 @@ public class Tache implements Serializable{
 	public Double getCoutPrive() {
 		return coutPrive;
 	}
+	public Double getCoutcoutIndividuelTache() {
+		return coutIndividuelTache;
+	}
+
 	public void setCoutPrive(Double coutPrive) {
 		this.coutPrive = coutPrive;
 	}
