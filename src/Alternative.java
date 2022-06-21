@@ -56,7 +56,6 @@ public class Alternative implements Serializable{
 		
 		for (Tache t: this.getTaches()) {
 			for (Alternative alt : alternatives) {
-				//for (Tache t0 : alternatives.get(1).getTaches()) {
 				for (Tache t0 : alt.getTaches()) {
 					if (t.getIntitule() == t0.getIntitule()) {
 					tachescommunes.add(t);

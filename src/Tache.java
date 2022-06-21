@@ -13,6 +13,12 @@ public class Tache implements Serializable{
 		this.coutPublic = coutPublic;
 	}
 	
+	@Override
+	public String toString() {
+		//return "Tache: " + intitule + "/ ";
+		return intitule;
+	}
+
 	public Tache() {}
 	
 	
