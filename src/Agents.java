@@ -16,6 +16,7 @@ import jade.lang.acl.UnreadableException;
 
 public class Agents extends Agent {
 	
+//<<<<<<< HEAD
 	
 	AMSAgentDescription [] agents = null;
 	Alternative myAlt;
@@ -25,6 +26,33 @@ public class Agents extends Agent {
 
 	//Les alternatives des autres agents
 	ArrayList<Alternative> alt = new ArrayList<Alternative>();
+//=======
+	private double coutReservation;
+	protected double coutLimite;
+	private double utiliteReference;
+	
+	
+	public double getCoutReservation() {
+		return coutReservation;
+	}
+	public void setCoutReservation(double coutReservation) {
+		this.coutReservation = coutReservation;
+	}
+
+	public double getCoutLimite() {
+		return coutLimite;
+	}
+	public void setCoutLimite(double coutLimite) {
+		this.coutLimite = coutLimite;
+	}
+
+	public double getUtiliteReference() {
+		return utiliteReference;
+	}
+	public void setUtiliteReference(double utiliteReference) {
+		this.utiliteReference = utiliteReference;
+	}
+//>>>>>>> 500d3167a6cf3322d771bcbe8afab59928c8ae66
 
 
 	@Override
@@ -181,7 +209,7 @@ public class Agents extends Agent {
         			i = i+1;
         		}
         		try {
-					Thread.sleep(5000);
+					Thread.sleep(7000);
 				} catch (InterruptedException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -220,13 +248,15 @@ public class Agents extends Agent {
         				for (Tache t0 : at) {
         					if (t.getIntitule().equalsIgnoreCase(t0.getIntitule())) {
         						//System.out.println(t.getIntitule() +  "==" +t0.getIntitule());
+        						if (!(TC.contains(t))) {
         						TC.add(t);
+        						}
         				}
         			
         			}
         			}
         		}
-        		System.out.println("TC = " +  TC);
+        		System.out.println(getAID().getLocalName() + " TC = " +  TC);
         		
         		
         		/* ENSEMBLE COMMUNS */
@@ -238,8 +268,12 @@ public class Agents extends Agent {
         			for (Alternative a : alt) {
         				for (Tache ts : a.getTaches()) {
         					if (ts.getIntitule().equals(t.getIntitule())) {
+        						if (!(agents.contains(a.getAgent()))) {
         						agents.add(a.getAgent());
+        						}
+        						if (!(taches.contains(t))) {
         						taches.add(ts);
+        						}
         				}
         					
         			}
@@ -249,9 +283,9 @@ public class Agents extends Agent {
         		ecs.add(new EnsembleCommun(taches,agents));
         	}
         		
-        		for (EnsembleCommun e : ecs) {
+        		/*for (EnsembleCommun e : ecs) {
         			System.out.println("EC = " + e.getAgents() + "," + e.getTaches());
-        		}
+        		}*/
         		
         		/* STRUCUTURE DE COALITION */
         		
@@ -263,10 +297,14 @@ public class Agents extends Agent {
         				if (e.getAgents().equals(e1.getAgents())) {
         				ArrayList<Tache> ts = new ArrayList<Tache>();
         				for (Tache t : e.getTaches()) {
+        					if (!(ts.contains(t))) {
         					ts.add(t);
+        					}
         				}
         				for (Tache t : e1.getTaches()) {
+        					if(!(ts.contains(t))) {
         					ts.add(t);
+        					}
         				}
         				
         				sc.add(new EnsembleCommun(ts,e.getAgents()));
@@ -276,15 +314,26 @@ public class Agents extends Agent {
         		}
         		
         		for (EnsembleCommun e : sc) {
+        			try {
+    					Thread.sleep(5000);
+    				} catch (InterruptedException ex) {
+    					// TODO Auto-generated catch block
+    					ex.printStackTrace();
+    				}
       			  for (Tache t : e.getTaches()) {
       				  System.out.print("{" + t.getIntitule() + "},");
+
       			  }
       			  for (String a : e.getAgents()) {
       				  System.out.print("{" + a + "}");
+
       			  }
       			  System.out.println();
+      			  
       		  }
         		
+        	
+        	System.out.println();
         		
         	        		
         	}

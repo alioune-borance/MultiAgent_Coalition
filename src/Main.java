@@ -28,7 +28,7 @@ public class Main {
 			
 			ArrayList<Tache> ts2 = new ArrayList<Tache>();
 			ts2.add(new Tache("t3",1.0,2.));
-			ts2.add(new Tache("t5",1.0,2.));
+			ts2.add(new Tache("t2",1.0,2.));
 			ts2.add(new Tache("t4",1.0,2.));
 		   
 		   ArrayList<ArrayList<Tache>> taches = new ArrayList<ArrayList<Tache>>();
