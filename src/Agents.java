@@ -6,6 +6,7 @@ import java.util.List;
 
 
 import jade.core.AID;
+
 import jade.core.Agent;
 import jade.core.behaviours.*;
 import jade.domain.AMSService;
@@ -16,7 +17,6 @@ import jade.lang.acl.UnreadableException;
 
 public class Agents extends Agent {
 	
-//<<<<<<< HEAD
 	
 	AMSAgentDescription [] agents = null;
 	ArrayList<Alternative> myAlt = new ArrayList<Alternative>();
@@ -30,9 +30,7 @@ public class Agents extends Agent {
 
 	//Les alternatives des autres agents
 	ArrayList<Alternative> alt = new ArrayList<Alternative>();
-//=======
 	private double coutReservation;
-	protected double coutLimite;
 	private double utiliteReference;
 	
 	
@@ -42,6 +40,13 @@ public class Agents extends Agent {
 	public void setCoutReservation(double coutReservation) {
 		this.coutReservation = coutReservation;
 	}
+	private double coutLimite;
+	private double coutMinIndividuel; // a calculer dans la classe agent et à retransmettre aux alternatives
+	private ArrayList<Proposition> listePropositionsEnvoyees;
+	private ArrayList<Proposition> listePropositionsRecues;
+	private int NbPropositionsReçues;
+	private int NbCoalitions;
+	private ArrayList<Coalition> listeCoalitions;
 
 	public double getCoutLimite() {
 		return coutLimite;
@@ -49,14 +54,56 @@ public class Agents extends Agent {
 	public void setCoutLimite(double coutLimite) {
 		this.coutLimite = coutLimite;
 	}
-
-	public double getUtiliteReference() {
-		return utiliteReference;
+	public ArrayList<Proposition> getListePropositionsEnvoyees() {
+		return listePropositionsEnvoyees;
 	}
-	public void setUtiliteReference(double utiliteReference) {
-		this.utiliteReference = utiliteReference;
+	public void setListePropositionsEnvoyees(ArrayList<Proposition> listePropositionsEnvoyees) {
+		this.listePropositionsEnvoyees = listePropositionsEnvoyees;
 	}
-//>>>>>>> 500d3167a6cf3322d771bcbe8afab59928c8ae66
+	public ArrayList<Proposition> getListePropositionsRecues() {
+		return listePropositionsRecues;
+	}
+	public void setListePropositionsRecues(ArrayList<Proposition> listePropositionsRecues) {
+		this.listePropositionsRecues = listePropositionsRecues;
+	}
+	public int getNbPropositionsReçues() {
+		return NbPropositionsReçues;
+	}
+	public void setNbPropositionsReçues(int nbPropositionsReçues) {
+		NbPropositionsReçues = nbPropositionsReçues;
+	}
+	public int getNbCoalitions() {
+		return NbCoalitions;
+	}
+	public void setNbCoalitions(int nbCoalitions) {
+		NbCoalitions = nbCoalitions;
+	}
+	public ArrayList<Coalition> getListeCoalitions() {
+		return listeCoalitions;
+	}
+	public void setListeCoalitions(ArrayList<Coalition> listeCoalitions) {
+		this.listeCoalitions = listeCoalitions;
+	}
+	
+	
+	public double getCoutMinIndividuel() {
+		return coutMinIndividuel;
+	}
+	public void setCoutMinIndividuel(double coutMinIndividuel) {
+		this.coutMinIndividuel = coutMinIndividuel;
+	}
+	
+	public double min(double[] coutIndividuelAlt) {
+		double coutMinIndividuel = Integer.MAX_VALUE;
+		
+		for (double cout : coutIndividuelAlt) {
+			if (cout < coutMinIndividuel) {
+				coutMinIndividuel = cout;
+			}
+		}
+		
+		return coutMinIndividuel;
+	}
 
 
 	@Override

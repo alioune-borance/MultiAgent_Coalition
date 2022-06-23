@@ -7,6 +7,8 @@ public class Coalition implements Serializable{
 	//private List<Agent> agents;
 	private List<String> agents;
 	private List<Tache> taches;
+	private Proposition proposition; // proposition à l'origine de la formation de la coalition
+	
 	
 	public Coalition() {}
 	
@@ -30,5 +32,7 @@ public class Coalition implements Serializable{
 	public void setTaches(List<Tache> taches) {
 		this.taches = taches;
 	}
-	
+	public Proposition getProposition() {
+		return proposition;
+	}
 }
