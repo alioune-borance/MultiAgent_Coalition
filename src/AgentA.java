@@ -159,7 +159,7 @@ public class AgentA extends Agent{
 	
 	private class envoiProposition extends OneShotBehaviour {
 		public void action() {
-			System.out.println("[ Envoi de proposition A /A ]");
+			System.out.println("[ Envoi de proposition A /A ] par " + getAID().getLocalName());
 			ACLMessage msg = new ACLMessage(ACLMessage.PROPOSE);
 			msg.addReceiver(new AID("AgentB",AID.ISLOCALNAME));
 			List<Tache> t = new ArrayList<Tache>();
@@ -177,6 +177,7 @@ public class AgentA extends Agent{
 				e.printStackTrace();
 			}
 			send(msg);
+			System.out.println();
 		}
 		
 	}
@@ -184,7 +185,7 @@ public class AgentA extends Agent{
 	
 	private class attendreAcceptation extends OneShotBehaviour {
 		public void action() {
-			System.out.println("[ Attendre acceptation proposition A /A ]");
+			System.out.println("[ Attendre acceptation proposition A /A ] par " + getAID().getLocalName());
 			MessageTemplate modele = MessageTemplate.MatchPerformative(ACLMessage.ACCEPT_PROPOSAL);
 			ACLMessage msgRecu = receive(modele);
 			if (msgRecu != null) {
@@ -195,17 +196,21 @@ public class AgentA extends Agent{
 			else {
 				block();
 			}
+			System.out.println();
+
 		}
 		
 	}
 	
 	private class confirmerProposition extends OneShotBehaviour {
 		public void action() {
-			System.out.println("[ Confirmer proposition A /A ]");
+			System.out.println("[ Confirmer proposition A /A ] par " + getAID().getLocalName());
 			ACLMessage msg = new ACLMessage(ACLMessage.CONFIRM);
 			msg.addReceiver(new AID("AgentB",AID.ISLOCALNAME));
 			msg.setContent("Confirmation A1");
 			send(msg);
+			System.out.println();
+
 		}
 		
 		public int onEnd() {
@@ -226,7 +231,8 @@ public class AgentA extends Agent{
 			else {
 				block();
 			}
-			
+			System.out.println();
+
 
 	}
 	}

@@ -19,8 +19,12 @@ public class Agents extends Agent {
 //<<<<<<< HEAD
 	
 	AMSAgentDescription [] agents = null;
-	Alternative myAlt;
-	ArrayList<Tache> myT = new ArrayList<Tache>();
+	ArrayList<Alternative> myAlt = new ArrayList<Alternative>();
+	Alternative myAlt1 = null;
+	Alternative myAlt2 = null;
+	//ArrayList<Tache> myT = new ArrayList<Tache>();
+	ArrayList<ArrayList<Tache>> myT = new ArrayList<ArrayList<Tache>>();
+
 	ArrayList<ArrayList<Tache>> myT1 = new ArrayList<ArrayList<Tache>>();
 
 
@@ -59,7 +63,7 @@ public class Agents extends Agent {
     public void setup()
     {
 		Object[] args = getArguments();
-		ArrayList<Tache> ts = (ArrayList<Tache>)args[0];
+		ArrayList<ArrayList<Tache>> ts = (ArrayList<ArrayList<Tache>>)args[0];
 		
 		/* Tous les agents du container */
 	    try {
@@ -69,16 +73,23 @@ public class Agents extends Agent {
 	    }
 	    catch (Exception e) { }
 	    
-	    for (Tache t : ts) {
-	    	myT.add(t);
+	    int j = 0;
+	    for (ArrayList<Tache> t1 : ts) {
+	    	/*for (Tache t : t1) {
+	    		myT.add(t);
+	    	}*/
+			myAlt.add(new Alternative("alt"+j,t1,getAID().getLocalName().toString()));
+			myT.add(t1);
+			j = j + 1;
 	    }
 		
 		/* Alternative de l'agent */
-		myAlt = new Alternative("alt1",myT,getAID().getLocalName().toString());
+		//myAlt1 = new Alternative("alt1",myT,getAID().getLocalName().toString());
 		
-       
-        System.out.println("Alternative = [{" + myAlt.getAgent() + "},{" + myAlt.getTaches() + "}]");
+       for (Alternative a: myAlt) {
+        System.out.print("Alternative = [{" + a.getAgent() + "},{" + a.getTaches() + "}]");
         System.out.println();
+       }
         
         /*for (int i=0; i<agents.length;i++){
             AID agentID = agents[i].getName();
@@ -156,11 +167,12 @@ public class Agents extends Agent {
 
 				ACLMessage msg= receive();
 				Alternative plan;
-				ArrayList<Tache> plan1 = new ArrayList<Tache>();
+				//ArrayList<Tache> plan1 = new ArrayList<Tache>();
+				ArrayList<ArrayList<Tache>> plan1 = new ArrayList<ArrayList<Tache>>();
 
 				if (msg!=null) {
 					try {
-						plan1 =  (ArrayList<Tache>)msg.getContentObject();
+						plan1 =  (ArrayList<ArrayList<Tache>>)msg.getContentObject();
 					} catch (UnreadableException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
@@ -170,13 +182,16 @@ public class Agents extends Agent {
 					   myAgent.getLocalName() + " <- " +
 					   plan1 );
 					
-					ArrayList<Tache> ts = new ArrayList<Tache>();
-					for (Tache t : plan1) {
+					ArrayList<ArrayList<Tache>> ts = new ArrayList<ArrayList<Tache>>();
+					for (ArrayList<Tache> t : plan1) {
 						ts.add(t);
+						myT1.add(t);
 					}
 					
-					alt.add(new Alternative("Alternative_",ts,msg.getSender().getLocalName()));
-					myT1.add(ts);
+					alt.add(new Alternative("Alternative_"+msg.getSender().getLocalName(),ts.get(0),msg.getSender().getLocalName()));
+					alt.add(new Alternative("Alternative_"+msg.getSender().getLocalName(),ts.get(1),msg.getSender().getLocalName()));
+
+					//myT1.add(ts);
 
 					}
 				}
@@ -205,17 +220,18 @@ public class Agents extends Agent {
         		System.out.println(myAlt.getTachesCommunes(alt));*/
         		int i = 0;
         		for (Alternative a : alt) {
-        			System.out.println(getAID().getLocalName() + " " + i + " " + a.getTaches() + "=>" + alt);
+        			//System.out.println(getAID().getLocalName() + " reçoit les alternatives =>" + alt);
+        			System.out.println(getAID().getLocalName() + " recoit de l'" + a.getAgent() + " l'alternative " + a.getTaches());
         			i = i+1;
         		}
         		try {
-					Thread.sleep(7000);
+					Thread.sleep(16000);
 				} catch (InterruptedException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
         		
-        		ArrayList<Tache> ts0 = new ArrayList<Tache>();
+        		/*ArrayList<Tache> ts0 = new ArrayList<Tache>();
      		   ts0.add(new Tache("t1",1.0,2.));
      		   ts0.add(new Tache("t2",1.0,2.));
      		   ts0.add(new Tache("t4",1.0,2.));
@@ -234,16 +250,26 @@ public class Agents extends Agent {
         		
         		ArrayList<Alternative> alternatives = new ArrayList<Alternative>();
         		alternatives.add(new Alternative("alt1",ts0,"agentA"));
-        		alternatives.add(new Alternative("alt2",ts0,"agentB"));
+        		alternatives.add(new Alternative("alt2",ts0,"agentB"));*/
         		//System.out.println(alternatives.get(0).getTaches().get(0).getIntitule() + " - " + alternatives.get(1).getTaches()) ;
         		
-        		ArrayList<Tache> tc = myAlt.getTachesCommunes(alternatives);
+   
+        		//ArrayList<Tache> tc = myAlt.getTachesCommunes(alt);
         		//System.out.println(myAlt.getTaches() + "/" + alt + "TC = " + tc);
         		//System.out.println("TC = " +  myT1);
         		
+        		try {
+					Thread.sleep(5000);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
         		/* TACHES COMMUNES */
         		ArrayList<Tache> TC = new ArrayList<Tache>();
-        		for (Tache t: myAlt.getTaches()) {
+        		ArrayList<ArrayList<Tache>> TCs = new ArrayList<ArrayList<Tache>>();
+
+        		for (Alternative a : myAlt) {
+        		for (Tache t: a.getTaches()) {
         			for (ArrayList<Tache> at : myT1) {
         				for (Tache t0 : at) {
         					if (t.getIntitule().equalsIgnoreCase(t0.getIntitule())) {
@@ -254,10 +280,16 @@ public class Agents extends Agent {
         				}
         			
         			}
+        			
         			}
+            		TCs.add(TC);
+
         		}
-        		System.out.println(getAID().getLocalName() + " TC = " +  TC);
         		
+        		}
+        		
+        		System.out.println(getAID().getLocalName() + " TC = " +  TC);
+        	
         		
         		/* ENSEMBLE COMMUNS */
         		ArrayList<EnsembleCommun> ecs= new ArrayList<EnsembleCommun>();
@@ -268,6 +300,7 @@ public class Agents extends Agent {
         			for (Alternative a : alt) {
         				for (Tache ts : a.getTaches()) {
         					if (ts.getIntitule().equals(t.getIntitule())) {
+        						//System.out.println(ts.getIntitule() +".equals(" + t.getIntitule());
         						if (!(agents.contains(a.getAgent()))) {
         						agents.add(a.getAgent());
         						}
@@ -283,9 +316,9 @@ public class Agents extends Agent {
         		ecs.add(new EnsembleCommun(taches,agents));
         	}
         		
-        		/*for (EnsembleCommun e : ecs) {
+        		for (EnsembleCommun e : ecs) {
         			System.out.println("EC = " + e.getAgents() + "," + e.getTaches());
-        		}*/
+        		}
         		
         		/* STRUCUTURE DE COALITION */
         		
@@ -320,6 +353,7 @@ public class Agents extends Agent {
     					// TODO Auto-generated catch block
     					ex.printStackTrace();
     				}
+        			System.out.print("Structure de coalition : " +getAID().getLocalName() + " ");
       			  for (Tache t : e.getTaches()) {
       				  System.out.print("{" + t.getIntitule() + "},");
 
@@ -329,12 +363,11 @@ public class Agents extends Agent {
 
       			  }
       			  System.out.println();
-      			  
+      			  System.out.println();
+
       		  }
         		
-        	
-        	System.out.println();
-        		
+        	        		
         	        		
         	}
         });
@@ -349,7 +382,9 @@ public class Agents extends Agent {
 			
 			ACLMessage msg = new ACLMessage(ACLMessage.INFORM);
 			for (int i=0; i<agents.length;i++) {
-				System.out.println(getAID().getLocalName() + " [ Envoi de Plan ] " + myAlt.getTaches() + " à " + agents[i].getName().getLocalName());
+				for (Alternative a : myAlt) {
+				System.out.println(getAID().getLocalName() + " [ Envoi de Plan ] " + a.getTaches() + " à " + agents[i].getName().getLocalName());
+				}
 				AID agentID = agents[i].getName();
 				
 				if (agents[i].getName().getLocalName().contains("Agent")) {

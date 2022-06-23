@@ -39,7 +39,7 @@ public class AgentB extends Agent{
 	
 	private class attendreProposition extends OneShotBehaviour {
 		public void action() {
-			System.out.println("[ Attente de la proposition A /B ]");
+			System.out.println("[ Attente de la proposition A /B ] par " + getAID().getLocalName());
 			MessageTemplate modele = MessageTemplate.MatchPerformative(ACLMessage.PROPOSE);
 			ACLMessage msgRecu = receive(modele);
 			if (msgRecu != null) {
@@ -56,17 +56,21 @@ public class AgentB extends Agent{
 			else {
 				block();
 			}
+			System.out.println();
+
 		}
 		
 	}
 	
 	private class accepterPropostion extends OneShotBehaviour {
 		public void action() {
-			System.out.println("[ Accepter proposition A /B ]");
+			System.out.println("[ Accepter proposition A /B ] par " + getAID().getLocalName());
 			ACLMessage msg = new ACLMessage(ACLMessage.ACCEPT_PROPOSAL);
 			msg.addReceiver(new AID("AgentA",AID.ISLOCALNAME));
 			msg.setContent("Acceptation A1");
 			send(msg);
+			System.out.println();
+
 		}
 		
 	}
@@ -74,7 +78,7 @@ public class AgentB extends Agent{
 	
 	private class attendreConfirmation extends OneShotBehaviour {
 		public void action() {
-			System.out.println("[ Attendre confirmation proposition A /B ]");
+			System.out.println("[ Attendre confirmation proposition A /B ] par " + getAID().getLocalName());
 			MessageTemplate modele = MessageTemplate.MatchPerformative(ACLMessage.CONFIRM);
 			ACLMessage msgRecu = receive(modele);
 			if (msgRecu != null) {
@@ -85,17 +89,21 @@ public class AgentB extends Agent{
 			else {
 				block();
 			}
+			System.out.println();
+
 		}
 		
 	}
 	
 	private class confirmerProposition extends OneShotBehaviour {
 		public void action() {
-			System.out.println("[ Confirmer proposition A /B ]");
+			System.out.println("[ Confirmer proposition A /B ] par " + getAID().getLocalName());
 			ACLMessage msg = new ACLMessage(ACLMessage.CONFIRM);
 			msg.addReceiver(new AID("AgentA",AID.ISLOCALNAME));
 			msg.setContent("Confirmation A1");
 			send(msg);
+			System.out.println();
+
 		}
 		
 		public int onEnd() {
@@ -116,6 +124,8 @@ public class AgentB extends Agent{
 			else {
 				block();
 			}
+			System.out.println();
+
 		
 		}
 	}
