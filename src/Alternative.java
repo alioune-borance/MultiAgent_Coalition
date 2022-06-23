@@ -1,6 +1,7 @@
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.lang.Math;
 import jade.core.Agent;
 
 /*
@@ -8,9 +9,10 @@ import jade.core.Agent;
  * -> t.coutPrive : coût privé de la tâche t, n’est connu que par l’individu ai
  * 
  * -> t.coutIndividuelTache = t.coutPublic + t.coutPrive : coût individuel d'une tâche effectuée sans coopération 
- * -> alt.coutMinIndividuel : coût de référence utilisé pour calculer l'utilité estimée d'une alternative
  * 
  * -> alt.coutIndividuel = somme(coutIndividuelTache), pour chaque t dans taches : coût individuel d'une alternative effectuée sans coopération
+ * 
+ * -> alt.coutMinIndividuel = min(alt.coutIndividuel) : coût mimimum parmis toutes les alternatives de l'agent
  * 
  * -> alt.coutEstime = somme(t.coutPub/n + t.coutPriv), pour chaque t dans taches : coût estimé de l'alternative
  * 		- coût d'une alternative effectuée en coopération
@@ -38,6 +40,15 @@ import jade.core.Agent;
  * 		  Premier cycle de négociations : ordonnancement des alternatives sur la base de leurs utilités estimées.
  * 		- Second cycle de négociations (cas général) : ordonnancement des alternatives sur la base de leur désirabilité.
  * 
+ * Pi = {epsilon, omega, gamma, rho, mu} où pour tout 'e' appartenant à Pi : -1 <= e <= 1 est un ensemble de paramètres caractéristiques 
+ * pour caractériser chaque alternative à chaque cycle de négociations
+ * ils sont mis à jour avant chaque étape d’échange de pro-positions
+ * 
+ * Pi_ = {epsilon_, omega_, gamma_ , rho_, mu_} est un ensemble de paramètres de valorisation permettant
+ * d’attribuer des poids à chacun des paramètres dans Pi
+ * 
+ * Poids de l’utilité estimé (epsilon), Poids d’alternative (omega), Poids des tâches (gamma), Poids des propositions envoyées (rho), Poids de la distance (mu)
+ * 
  */
 
 // alternative appartenant à l'agent
@@ -58,13 +69,27 @@ public class Alternative implements Serializable{
 	
 	private double coutIndividuel;
 	private double coutEstime;
-	private double coutMinIndividuel; //fixe, définit par l'agent ?
+	private double coutMinIndividuel; 
 	private double utiliteEstime;
-	
-	
 	private double coutReservation; 
 	private double utiliteReference;
+	private double desirabilite;
+	private StructureCoalition cs; // Structure de coalition associée à l'aternative
+	private int tourNegociation;
 	
+	//Paramètres caractéristiques de Pi = {epsilon, omega, gamma, rho, mu} 
+	private double poidsUtiliteEstime;
+	private double poidsAlternative;
+	private double poidsTaches;
+	private double poidsPropositionsEnvoyées;
+	private double poidsDistance;
+	
+	//Paramètres de valorisation de Pi_ = {epsilon_, omega_, gamma_ ,  rho_, mu_} 
+	private double valorisationUtiliteEstime;
+	private double valorisationAlternative;
+	private double valorisationTaches;
+	private double valorisationPropositionsEnvoyées;
+	private double valorisationDistance;
 	
 	public Alternative() {
 		super();
@@ -76,11 +101,15 @@ public class Alternative implements Serializable{
 		this.taches = taches;
 		this.agent = agent;
 		this.coutIndividuel = this.calculCoutIndividuel(this.taches);
+		this.coutMinIndividuel = this.agentObj.getCoutMinIndividuel();
 		this.coutEstime = this.calculCoutEstime(this.taches);
 		this.utiliteEstime = this.coutMinIndividuel - this.coutEstime;
-		this.coutReservation = this.coutMinIndividuel * this.agentObj.coutLimite; //intégrer le coutLimite
+		this.coutReservation = this.coutMinIndividuel * this.agentObj.getCoutLimite(); //intégrer le coutLimite
 		this.utiliteReference = this.coutIndividuel - this.coutReservation;
+		this.desirabilite = this.getDesirabilite(this.poidsUtiliteEstime, this.poidsAlternative, this.poidsTaches, this.poidsPropositionsEnvoyées, this.poidsDistance, 
+				this.valorisationUtiliteEstime, this.valorisationAlternative, this.valorisationTaches, this.valorisationPropositionsEnvoyées, this.valorisationDistance);
 	}
+	 
 
 	public String getIntitule() {
 		return intitule;
@@ -132,6 +161,143 @@ public class Alternative implements Serializable{
 		}
 		
 		return sommeCoutEstime;
+	}
+	
+	// Implémentation de la fonction de fréquence d'une tache :
+	// Permet d'évaluer le nombre de coalitions contenant la tâche, parmis toutes les propositions de coalitions reçues
+	public double frequenceTache(Tache t) {
+		double frequenceTache = 0.0;
+		int NbApparitionTache = 0;
+		// Nombre d'apparition de la tâche dans les coalitions de l'agent
+		for (Coalition coalition : this.agentObj.getListeCoalitions()) {
+			for (Tache tache : coalition.getTaches()) {
+				if (tache.equals(t)) {
+					NbApparitionTache++;
+				}
+			}
+		}
+		frequenceTache = NbApparitionTache/this.agentObj.getNbPropositionsReçues();
+		
+		return frequenceTache;
+	}
+	
+	// Fonction calculant la mis à jour du poids des taches
+	public double getPoidsTaches(StructureCoalition cs) {
+		double poidsTaches = 0.0;
+		double sommeFrequence = 0.0;
+		double sommeFrequencesCoalitions = 0.0;
+		double sommeFrequencesAllCoalitions = 0.0;
+		
+		// somme des fréquences des taches dans la structure de coalition associée à l'alternative, 
+		// divisée par le nombre d'agent dans la coalition
+		for (Coalition coalition : cs.getCoalitions()) {
+			for (Tache tache : coalition.getTaches()) {
+				sommeFrequence += frequenceTache(tache)/coalition.getAgents().size();
+			}
+			sommeFrequencesCoalitions += sommeFrequence;
+			sommeFrequence = 0.0;
+		}
+		
+		// Somme des fréquences des tâches de l'ensemble des coalitions de l'agent 
+		for (Coalition coalition : this.agentObj.getListeCoalitions()) {
+			for (Tache tache : coalition.getTaches()) {
+				sommeFrequence += frequenceTache(tache); 
+			}
+			sommeFrequencesAllCoalitions += sommeFrequence;
+			sommeFrequence = 0.0;
+		}
+		
+		poidsTaches = sommeFrequencesCoalitions/sommeFrequencesAllCoalitions;
+		
+		return poidsTaches;
+	}
+	
+	// Mesure l'importance d'une alternative alpha, par rapport à d'autre alternatives, pour les autres agents
+	public double getPoidsAlternative() {
+		double poidsAlternative = 0.0;
+		int tachesCommunes = 0;
+		int nbAgentEmmeteurs = 0;
+		int nbAgentCS = 0;
+		ArrayList<String> listeAgentEmmeteurs = new ArrayList<String>();
+		ArrayList<String> listeAgentCS = new ArrayList<String>();
+		
+		//nombre d'agent ayant envoyé une proposition de coalition c, tq. : Tc n'ait aucune tache dans Talt
+		for (Proposition proposition : this.agentObj.getListePropositionsRecues()) {
+			for (Tache tache : proposition.getCoalition().getTaches()) {
+				for (Tache t : this.taches) {
+					if (tache.equals(t)) {
+						tachesCommunes++;
+					}
+				}
+			}
+			if(tachesCommunes == 0 && (listeAgentEmmeteurs.contains(proposition.getAgentEmeteur()) == false)){
+				listeAgentEmmeteurs.add(proposition.getAgentEmeteur());
+			}
+			tachesCommunes = 0;
+		}
+		nbAgentEmmeteurs = listeAgentEmmeteurs.size();
+		
+		// On compte le nombre d'agent dans la structure de coalition associée à l'alternative
+		for (Coalition coalition : this.cs.getCoalitions()) {
+			for (String string : coalition.getAgents()) {
+				if(listeAgentCS.contains(string) == false){
+					listeAgentCS.add(string);
+				}
+			}
+			
+		}
+		nbAgentCS = listeAgentCS.size();
+		
+		// On divise le nombre d'agent emmeteurs obtenus par le nombre d'agent dans la structure de coalition associée à l'alternative
+		poidsAlternative = nbAgentEmmeteurs/nbAgentCS;
+
+		return poidsAlternative;
+	}
+	
+	public double getPoidsPropositionsEnvoyees(int tourNegociation) {
+		ArrayList<String> listeAlternativePropositions = new ArrayList<String>(); // Liste des alternatives choisies pour envoyé une proposition de coalition
+		int nbFoisAlternativeChoisie = 0;
+		double poidsPropositionsEnvoyees = 0.0;
+		
+		// faire le compte du nombre de fois où l'alternative a été choisie pour envoyer une propositions de coalition c appartenant à la structure de coalition associée à l'alternative.
+		// on parcourt la cs associée à l'alternative
+		for (Coalition coalition : this.cs.getCoalitions()) {
+			listeAlternativePropositions.add(coalition.getProposition().getIntituleAlternative());
+		}
+		for (String string : listeAlternativePropositions) {
+			if (this.intitule.equals(string)) {
+				nbFoisAlternativeChoisie++;
+			}
+		}
+		poidsPropositionsEnvoyees = nbFoisAlternativeChoisie/tourNegociation;
+		
+		return poidsPropositionsEnvoyees;
+	}
+	
+	// Fonction effectuant la mis à jour des paramètres caractéristiques de l'alternative.
+	public void misAJourPoids() {
+		//epsilon
+		this.poidsUtiliteEstime = 1 - ((this.coutMinIndividuel - this.utiliteEstime)/this.coutIndividuel);
+		//omega
+		this.poidsAlternative = this.getPoidsAlternative();
+		//gamma
+		this.poidsTaches = this.getPoidsTaches(this.cs);
+		//rho
+		this.poidsPropositionsEnvoyées = getPoidsPropositionsEnvoyees(this.tourNegociation);
+	}
+	
+	// Fonction effectuant le calcul de la désirabilité de l'alternative
+	//{epsilon, omega, gamma, rho, mu}
+	public double getDesirabilite(double poidsutiliteEstime, double poidsAlternative, double poidsTaches, double poidsPropositionsEnvoyées, double poidsDistance,
+			double valorisationUtiliteEstime, double valorisationAlternative, double valorisationTaches, double valorisationPropositionsEnvoyées, double valorisationDistance) {
+		
+		desirabilite = Math.pow(valorisationUtiliteEstime, poidsutiliteEstime)
+				+ Math.pow(valorisationAlternative, poidsAlternative)
+				+ Math.pow(valorisationTaches, poidsTaches)
+				+ Math.pow(valorisationDistance, poidsDistance)
+				- Math.pow(valorisationPropositionsEnvoyées, poidsPropositionsEnvoyées);
+		
+		return desirabilite;
 	}
 	
 	

@@ -7,7 +7,8 @@ public class Proposition implements Serializable{
 	/*private List<String> taches;
 	private List<String> agentConcernes;*/
 	private Coalition coalition;
-	
+	private String intituleAlternative;
+
 	public Proposition(String agentEmeteur,String agentRecepteur,Coalition coalition) {
 		this.agentEmeteur = agentEmeteur;
 		this.agentRecepteur = agentRecepteur;
@@ -16,14 +17,18 @@ public class Proposition implements Serializable{
 		this.coalition = coalition;
  	}
 	
+	public String getIntituleAlternative() {
+		return intituleAlternative;
+	}
+	public void setIntituleAlternative(String intituleAlternative) {
+		this.intituleAlternative = intituleAlternative;
+	}
 	public Coalition getCoalition() {
 		return coalition;
 	}
-
 	public void setCoalition(Coalition c) {
 		this.coalition = c;
 	}
-
 	public Proposition() {}
 	
 	public String getAgentEmeteur() {
